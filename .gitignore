@@ -1,0 +1,13 @@
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+logs
+
+/target/
+*/target/
+mall/*/target/
+*/target/*
+*/target/**
