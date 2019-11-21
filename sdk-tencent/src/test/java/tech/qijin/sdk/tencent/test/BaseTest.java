@@ -1,4 +1,4 @@
-package tech.qijin.sdk.ali.test;
+package tech.qijin.sdk.tencent.test;
 
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
