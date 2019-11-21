@@ -17,6 +17,7 @@
 
     <modules>
         <module>sdk-huanxin</module>
+        <module>sdk-qiniu</module>
     </modules>
 
     <properties>
