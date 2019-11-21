@@ -18,6 +18,7 @@
     <modules>
         <module>sdk-huanxin</module>
         <module>sdk-qiniu</module>
+        <module>sdk-ali</module>
     </modules>
 
     <properties>
