@@ -23,9 +23,9 @@ public class TxCosServiceImpl implements TxCosService {
     public CredentialVo getCredential() {
         TreeMap<String, Object> config = new TreeMap<String, Object>();
         // 云 API 密钥 secretId
-        config.put("secretId", "AKIDTigPr3vXrugBpCr5d2A3liQs51jA3D3g");
+        config.put("secretId", "");
         // 云 API 密钥 secretKey
-        config.put("secretKey", "au97pGQKyQcYlkUx96nDMSJujHZbNt87");
+        config.put("secretKey", "");
         // 临时密钥有效时长，单位是秒
         config.put("durationSeconds", 1800);
 
