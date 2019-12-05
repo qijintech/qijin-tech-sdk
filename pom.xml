@@ -19,6 +19,7 @@
         <module>sdk-huanxin</module>
         <module>sdk-qiniu</module>
         <module>sdk-ali</module>
+        <module>sdk-tencent</module>
     </modules>
 
     <properties>
