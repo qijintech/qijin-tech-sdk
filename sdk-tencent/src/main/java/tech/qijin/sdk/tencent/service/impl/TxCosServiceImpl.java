@@ -4,11 +4,16 @@ import com.alibaba.fastjson.JSON;
 import com.tencent.cloud.CosStsClient;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tech.qijin.sdk.tencent.pojo.CredentialVo;
 import tech.qijin.sdk.tencent.service.TxCosService;
+import tech.qijin.util4j.kms.KmsBean;
+import tech.qijin.util4j.lang.constant.ResEnum;
+import tech.qijin.util4j.utils.MAssert;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.TreeMap;
 
 /**
@@ -19,13 +24,21 @@ import java.util.TreeMap;
 @Slf4j
 @Service
 public class TxCosServiceImpl implements TxCosService {
+    private static final String PREFIX = "tencent";
+
+    @Autowired
+    private KmsBean kmsBean;
+
     @Override
     public CredentialVo getCredential() {
+        Optional<String> secretIdOpt = kmsBean.getSecretId(PREFIX);
+        Optional<String> secretKeyOpt = kmsBean.getSecretKey(PREFIX);
+        MAssert.isTrue(secretIdOpt.isPresent() && secretKeyOpt.isPresent(), ResEnum.INVALID_KEY);
         TreeMap<String, Object> config = new TreeMap<String, Object>();
         // 云 API 密钥 secretId
-        config.put("secretId", "");
+        config.put("secretId", secretIdOpt.get());
         // 云 API 密钥 secretKey
-        config.put("secretKey", "");
+        config.put("secretKey", secretKeyOpt.get());
         // 临时密钥有效时长，单位是秒
         config.put("durationSeconds", 1800);
 
