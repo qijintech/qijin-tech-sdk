@@ -51,7 +51,7 @@ public class HuanXinRestClient {
                 .replace(HX_APP_NAME, properties.getAppName())
                 .replace(HX_URL_SUFFIX, suffix);
         Map<String, String> headers = Maps.newHashMap();
-        headers.put("Authorization", "Bearer YWMtWIazKgp1Eeq-t_mB37HunQAAAAAAAAAAAAAAAAAAAAH9wEqQTt8R5pq3jcllktt-AgMAAAFugYRt6QBPGgDZqxy8XTKHl_NsS3Teil2HaAt6kVjGyCTtJB0QsCiy_A");
+        headers.put("Authorization", "Bearer XX");
         try {
             HttpResp resp = HttpClient.doPost(url, body, headers);
             if (resp.getCode() != HuanXinCode.SUCCESS.getCode()) {

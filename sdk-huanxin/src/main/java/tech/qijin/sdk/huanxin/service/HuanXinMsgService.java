@@ -1,5 +1,6 @@
 package tech.qijin.sdk.huanxin.service;
 
+import tech.qijin.sdk.huanxin.pojo.HuanXinMsgImg;
 import tech.qijin.sdk.huanxin.pojo.HuanXinMsgText;
 
 /**
@@ -10,5 +11,5 @@ import tech.qijin.sdk.huanxin.pojo.HuanXinMsgText;
 public interface HuanXinMsgService {
     void sendText(HuanXinMsgText text);
 
-    void sendImg(HuanXinMsgText img);
+    void sendImg(HuanXinMsgImg img);
 }

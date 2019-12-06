@@ -3,6 +3,7 @@ package tech.qijin.sdk.huanxin.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tech.qijin.sdk.huanxin.config.HuanXinProperties;
+import tech.qijin.util4j.kms.KmsBean;
 
 /**
  * @author michealyang
@@ -13,6 +14,8 @@ import tech.qijin.sdk.huanxin.config.HuanXinProperties;
 public class HuanXinService {
     @Autowired
     protected HuanXinProperties properties;
+    @Autowired
+    protected KmsBean kmsBean;
 
     protected static final String HX_HOST = "HOST";
     protected static final String HX_ORG_NAME = "ORG_NAME";

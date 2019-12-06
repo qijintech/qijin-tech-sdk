@@ -20,6 +20,7 @@ import java.util.Map;
 @Service
 public class HuanXinAdminServiceImpl extends HuanXinService implements HuanXinAdminService {
     private static final String URL_TOKEN_SUFFIX = "token";
+    private static final String KMS_PREFIX = "huanxin";
 
     @Autowired
     private HuanXinRestClient huanXinRestClient;
@@ -28,8 +29,8 @@ public class HuanXinAdminServiceImpl extends HuanXinService implements HuanXinAd
     public HuanXinToken getToken() {
         Map<String, Object> req = Maps.newHashMap();
         req.put("grant_type", "client_credentials");
-        req.put("client_id", properties.getClientId());
-        req.put("client_secret", properties.getClientSecret());
+        req.put("client_id", kmsBean.getSecretId(KMS_PREFIX).get());
+        req.put("client_secret", kmsBean.getSecretKey(KMS_PREFIX).get());
         try {
             String res = huanXinRestClient.doPostWithoutAuth(URL_TOKEN_SUFFIX, req, String.class);
             log.info(res);
