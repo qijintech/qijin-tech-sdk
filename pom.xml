@@ -16,6 +16,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>sdk-dependencies</module>
         <module>sdk-huanxin</module>
         <module>sdk-qiniu</module>
         <module>sdk-ali</module>
