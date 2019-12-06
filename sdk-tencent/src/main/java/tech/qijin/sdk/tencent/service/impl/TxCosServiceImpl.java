@@ -74,7 +74,7 @@ public class TxCosServiceImpl implements TxCosService {
             CredentialVo credentialVo = JSON.parseObject(credential.toString(), CredentialVo.class);
             return credentialVo;
         } catch (IOException e) {
-            log.error("get tencent credentail exception | e={}", e);
+            log.error("get tencent credential exception | e={}", e);
             return null;
         }
     }
