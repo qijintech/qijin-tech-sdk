@@ -10,26 +10,31 @@
     </parent>
     <artifactId>sdk-tencent</artifactId>
     <groupId>tech.qijin.sdk</groupId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
+
+    <properties>
+        <sdk.tencent.version>1.0.0-SNAPSHOT</sdk.tencent.version>
+    </properties>
+
+    <modules>
+        <module>sdk-tencent-base</module>
+        <module>sdk-tencent-cloud</module>
+    </modules>
 
     <dependencies>
         <dependency>
             <groupId>tech.qijin.util4j</groupId>
             <artifactId>util4j-kms</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.tencent.cloud</groupId>
-            <artifactId>cos-sts-java</artifactId>
-            <version>3.0.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>tech.qijin.sdk</groupId>
+                <artifactId>sdk-tencent-base</artifactId>
+                <version>${sdk.tencent.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

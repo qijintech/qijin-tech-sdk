@@ -8,6 +8,4 @@ logs
 
 /target/
 */target/
-mall/*/target/
-*/target/*
-*/target/**
+*/*/target/
