@@ -1,14 +1,25 @@
 package tech.qijin.sdk.tencent.cloud.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.qcloud.cos.COSClient;
+import com.qcloud.cos.ClientConfig;
+import com.qcloud.cos.auth.BasicCOSCredentials;
+import com.qcloud.cos.auth.COSCredentials;
+import com.qcloud.cos.model.ObjectMetadata;
+import com.qcloud.cos.model.PutObjectRequest;
+import com.qcloud.cos.model.PutObjectResult;
+import com.qcloud.cos.model.StorageClass;
+import com.qcloud.cos.region.Region;
 import com.tencent.cloud.CosStsClient;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tech.qijin.sdk.tencent.base.Constants;
 import tech.qijin.sdk.tencent.cloud.TxCosService;
 import tech.qijin.sdk.tencent.cloud.config.SdkTencentCloudProperties;
+import tech.qijin.sdk.tencent.cloud.pojo.CosUploadVo;
 import tech.qijin.sdk.tencent.cloud.pojo.TxCosType;
 import tech.qijin.sdk.tencent.cloud.pojo.TxCredentialVo;
 import tech.qijin.util4j.kms.KmsBean;
@@ -17,8 +28,10 @@ import tech.qijin.util4j.utils.LogFormat;
 import tech.qijin.util4j.utils.MAssert;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.UUID;
 
 /**
  * @author michealyang
@@ -49,6 +62,40 @@ public class TxCosServiceImpl implements TxCosService {
                     .put("exception", e).build();
             return null;
         }
+    }
+
+    @Override
+    public CosUploadVo uploadFile(Optional<String> sceneOpt, Optional<String> fileName, Long fileSize, InputStream inputStream) {
+        Optional<String> secretIdOpt = kmsBean.getSecretId(Constants.TX_KMS_PREFIX);
+        Optional<String> secretKeyOpt = kmsBean.getSecretKey(Constants.TX_KMS_PREFIX);
+        MAssert.isTrue(secretIdOpt.isPresent() && secretKeyOpt.isPresent(), ResEnum.INVALID_KEY);
+        // 1 初始化用户身份信息(secretId, secretKey)
+        COSCredentials cred = new BasicCOSCredentials(secretIdOpt.get(), secretKeyOpt.get());
+        Optional<String> hostOpt = getHost(sceneOpt);
+        String bucket = getBucket(sceneOpt);
+        String region = getRegion(sceneOpt);
+        // 2 设置bucket的区域, COS地域的简称请参照 https://www.qcloud.com/document/product/436/6224
+        MAssert.isTrue(StringUtils.isNotBlank(region)
+                && StringUtils.isNotBlank(bucket), ResEnum.INVALID_CONFIG);
+        ClientConfig clientConfig = new ClientConfig(new Region(region));
+        // 3 生成cos客户端
+        COSClient cosclient = new COSClient(cred, clientConfig);
+        // bucket名需包含appid
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+        // 从输入流上传必须制定content length, 否则http客户端可能会缓存所有数据，存在内存OOM的情况
+        objectMetadata.setContentLength(fileSize);
+        // 默认下载时根据cos路径key的后缀返回响应的contenttype, 上传时设置contenttype会覆盖默认值
+//        objectMetadata.setContentType("image/jpeg");
+
+        PutObjectRequest putObjectRequest =
+                new PutObjectRequest(bucket, getFileName(fileName), inputStream, objectMetadata);
+        // 设置存储类型, 默认是标准(Standard), 低频(standard_ia)
+        putObjectRequest.setStorageClass(StorageClass.Standard_IA);
+        PutObjectResult putObjectResult = cosclient.putObject(putObjectRequest);
+        return CosUploadVo.builder()
+                .eTag(putObjectResult.getETag())
+                .url(getCosFilePath(hostOpt, getFileName(fileName)))
+                .build();
     }
 
     private TreeMap<String, Object> getCosConfig(TxCosType txCosType) {
@@ -105,6 +152,61 @@ public class TxCosServiceImpl implements TxCosService {
                 // 分片上传： 完成分片上传
                 "name/cos:CompleteMultipartUpload"
         };
+    }
+
+    private String getFileName(Optional<String> fileNameOpt) {
+        return fileNameOpt.orElse(randomFileName());
+    }
+
+    public String randomFileName() {
+        return UUID.randomUUID().toString().replace("-", "");
+    }
+
+    private Optional<String> getHost(Optional<String> sceneOpt) {
+        return sceneOpt.map(scene -> properties.getHostByScene(scene))
+                .orElse(Optional.ofNullable(properties.getHost()));
+    }
+
+    private String getBucket(Optional<String> sceneOpt) {
+        return sceneOpt.map(scene -> properties.getBucketByScene(scene).get())
+                .orElse(properties.getBucket());
+    }
+
+    private String getRegion(Optional<String> sceneOpt) {
+        return sceneOpt.map(scene -> properties.getRegionByScene(scene).get())
+                .orElse(properties.getRegion());
+    }
+
+    /**
+     * COS源地址示例: https://img-1300635595.cos.ap-beijing.myqcloud.com/1578841593008.jpg
+     * https://img-1300635595.cos.ap-beijing.myqcloud.com/864.jpg
+     *
+     * @return
+     */
+    private String getCosFilePath(Optional<String> hostOpt, String fileName) {
+        if (StringUtils.isNotBlank(hostOpt.get())) {
+            String host = hostOpt.get();
+            if (host.endsWith("/")) {
+                return new StringBuilder().append(hostOpt.get())
+                        .append(fileName)
+                        .toString();
+            } else {
+                return new StringBuilder().append(hostOpt.get())
+                        .append("/")
+                        .append(fileName)
+                        .toString();
+            }
+        } else {
+            return new StringBuilder()
+                    .append("https://")
+                    .append(properties.getBucket())
+                    .append(".cos")
+                    .append(".")
+                    .append(properties.getRegion())
+                    .append(".myqcloud.com/")
+                    .append(fileName)
+                    .toString();
+        }
     }
 }
 

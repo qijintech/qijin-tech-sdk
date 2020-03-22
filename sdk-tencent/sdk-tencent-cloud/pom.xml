@@ -22,5 +22,17 @@
             <artifactId>cos-sts-java</artifactId>
             <version>3.0.5</version>
         </dependency>
+        <dependency>
+            <groupId>com.qcloud</groupId>
+            <artifactId>cos_api</artifactId>
+            <version>5.6.18</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.tencentcloudapi</groupId>-->
+<!--            <artifactId>tencentcloud-sdk-java</artifactId>-->
+<!--            &lt;!&ndash; go to https://search.maven.org/search?q=tencentcloud-sdk-java and get the latest version. &ndash;&gt;-->
+<!--            &lt;!&ndash; 请到https://search.maven.org/search?q=tencentcloud-sdk-java查询最新版本 &ndash;&gt;-->
+<!--            <version>3.0.93</version>-->
+<!--        </dependency>-->
     </dependencies>
 </project>

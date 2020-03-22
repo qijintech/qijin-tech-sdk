@@ -7,4 +7,5 @@ package tech.qijin.sdk.tencent.base;
  */
 public class Constants {
     public static final String TX_KMS_PREFIX = "tencent";
+    public static final String TX_COS_REGION = "region";
 }
