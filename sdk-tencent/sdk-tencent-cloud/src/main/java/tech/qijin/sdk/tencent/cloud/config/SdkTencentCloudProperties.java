@@ -4,6 +4,7 @@ import lombok.Data;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Collections;
@@ -33,37 +34,37 @@ public class SdkTencentCloudProperties {
 
     private Map<String, Route> routeMap;
 
-    public Optional<String> getBucketByScene(String scene) {
+    public String getBucketByScene(String scene) {
         if (StringUtils.isBlank(scene)) {
-            return Optional.empty();
+            return Strings.EMPTY;
         }
         Route r = getRouteMap().get(scene);
         if (r != null) {
-            return Optional.ofNullable(r.getBucket());
+            return r.getBucket();
         }
-        return Optional.empty();
+        return Strings.EMPTY;
     }
 
-    public Optional<String> getHostByScene(String scene) {
+    public String getHostByScene(String scene) {
         if (StringUtils.isBlank(scene)) {
-            return Optional.empty();
+            return Strings.EMPTY;
         }
         Route r = getRouteMap().get(scene);
         if (r != null) {
-            return Optional.ofNullable(r.getHost());
+            return r.getHost();
         }
-        return Optional.empty();
+        return Strings.EMPTY;
     }
 
-    public Optional<String> getRegionByScene(String scene) {
+    public String getRegionByScene(String scene) {
         if (StringUtils.isBlank(scene)) {
-            return Optional.empty();
+            return Strings.EMPTY;
         }
         Route r = getRouteMap().get(scene);
         if (r != null) {
-            return Optional.ofNullable(r.getRegion());
+            return r.getRegion();
         }
-        return Optional.empty();
+        return Strings.EMPTY;
     }
 
     private Map<String, Route> getRouteMap() {

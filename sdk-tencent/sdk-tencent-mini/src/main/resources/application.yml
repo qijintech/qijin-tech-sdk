@@ -1,0 +1,15 @@
+spring:
+  profiles:
+    active: dev
+  util4j:
+    rpc:
+      http:
+        wxapi:
+          connect-timeout: 2000
+          write-timeout: 2000
+          read-timeout: 1000
+          retry-times: 1
+
+kms:
+  file-path: /var/
+  file-name: kms.properties

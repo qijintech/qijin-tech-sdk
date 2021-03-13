@@ -24,6 +24,31 @@
             </dependency>
             <dependency>
                 <groupId>tech.qijin.sdk</groupId>
+                <artifactId>sdk-tencent-base</artifactId>
+                <version>${sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tech.qijin.sdk</groupId>
+                <artifactId>sdk-tencent-cloud</artifactId>
+                <version>${sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tech.qijin.sdk</groupId>
+                <artifactId>sdk-tencent-mini</artifactId>
+                <version>${sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tech.qijin.sdk</groupId>
+                <artifactId>sdk-tencent-open</artifactId>
+                <version>${sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tech.qijin.sdk</groupId>
+                <artifactId>sdk-tencent-pay</artifactId>
+                <version>${sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tech.qijin.sdk</groupId>
                 <artifactId>sdk-ali</artifactId>
                 <version>${sdk.version}</version>
             </dependency>

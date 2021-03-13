@@ -19,6 +19,9 @@
     <modules>
         <module>sdk-tencent-base</module>
         <module>sdk-tencent-cloud</module>
+        <module>sdk-tencent-mini</module>
+        <module>sdk-tencent-open</module>
+        <module>sdk-tencent-pay</module>
     </modules>
 
     <dependencies>

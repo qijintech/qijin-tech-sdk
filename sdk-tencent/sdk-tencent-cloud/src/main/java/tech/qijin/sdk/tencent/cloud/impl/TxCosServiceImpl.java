@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tech.qijin.sdk.tencent.base.Constants;
 import tech.qijin.sdk.tencent.cloud.TxCosService;
+import tech.qijin.sdk.tencent.cloud.base.COSScene;
 import tech.qijin.sdk.tencent.cloud.config.SdkTencentCloudProperties;
 import tech.qijin.sdk.tencent.cloud.pojo.CosUploadVo;
 import tech.qijin.sdk.tencent.cloud.pojo.TxCosType;
@@ -27,8 +28,7 @@ import tech.qijin.util4j.lang.constant.ResEnum;
 import tech.qijin.util4j.utils.LogFormat;
 import tech.qijin.util4j.utils.MAssert;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -65,15 +65,25 @@ public class TxCosServiceImpl implements TxCosService {
     }
 
     @Override
-    public CosUploadVo uploadFile(Optional<String> sceneOpt, Optional<String> fileName, Long fileSize, InputStream inputStream) {
+    public CosUploadVo uploadFile(File file) throws FileNotFoundException {
+        return uploadFile(null, file);
+    }
+
+    @Override
+    public CosUploadVo uploadFile(COSScene cosScene, File file) throws FileNotFoundException {
+        return uploadFile(cosScene, Optional.ofNullable(file.getName()), file.length(), new FileInputStream(file));
+    }
+
+    @Override
+    public CosUploadVo uploadFile(COSScene cosScene, Optional<String> fileName, Long fileSize, InputStream inputStream) {
         Optional<String> secretIdOpt = kmsBean.getSecretId(Constants.TX_KMS_PREFIX);
         Optional<String> secretKeyOpt = kmsBean.getSecretKey(Constants.TX_KMS_PREFIX);
         MAssert.isTrue(secretIdOpt.isPresent() && secretKeyOpt.isPresent(), ResEnum.INVALID_KEY);
         // 1 初始化用户身份信息(secretId, secretKey)
         COSCredentials cred = new BasicCOSCredentials(secretIdOpt.get(), secretKeyOpt.get());
-        Optional<String> hostOpt = getHost(sceneOpt);
-        String bucket = getBucket(sceneOpt);
-        String region = getRegion(sceneOpt);
+        String host = getHost(cosScene);
+        String bucket = getBucket(cosScene);
+        String region = getRegion(cosScene);
         // 2 设置bucket的区域, COS地域的简称请参照 https://www.qcloud.com/document/product/436/6224
         MAssert.isTrue(StringUtils.isNotBlank(region)
                 && StringUtils.isNotBlank(bucket), ResEnum.INVALID_CONFIG);
@@ -94,7 +104,7 @@ public class TxCosServiceImpl implements TxCosService {
         PutObjectResult putObjectResult = cosclient.putObject(putObjectRequest);
         return CosUploadVo.builder()
                 .eTag(putObjectResult.getETag())
-                .url(getCosFilePath(hostOpt, getFileName(fileName)))
+                .url(getCosFilePath(host, getFileName(fileName)))
                 .build();
     }
 
@@ -162,19 +172,25 @@ public class TxCosServiceImpl implements TxCosService {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
-    private Optional<String> getHost(Optional<String> sceneOpt) {
-        return sceneOpt.map(scene -> properties.getHostByScene(scene))
-                .orElse(Optional.ofNullable(properties.getHost()));
+    private String getHost(COSScene cosScene) {
+        if (cosScene == null) {
+            return properties.getHost();
+        }
+        return properties.getHostByScene(cosScene.str());
     }
 
-    private String getBucket(Optional<String> sceneOpt) {
-        return sceneOpt.map(scene -> properties.getBucketByScene(scene).get())
-                .orElse(properties.getBucket());
+    private String getBucket(COSScene cosScene) {
+        if (cosScene == null) {
+            return properties.getBucket();
+        }
+        return properties.getBucketByScene(cosScene.str());
     }
 
-    private String getRegion(Optional<String> sceneOpt) {
-        return sceneOpt.map(scene -> properties.getRegionByScene(scene).get())
-                .orElse(properties.getRegion());
+    private String getRegion(COSScene cosScene) {
+        if (cosScene == null) {
+            return properties.getRegion();
+        }
+        return properties.getRegionByScene(cosScene.str());
     }
 
     /**
@@ -183,15 +199,14 @@ public class TxCosServiceImpl implements TxCosService {
      *
      * @return
      */
-    private String getCosFilePath(Optional<String> hostOpt, String fileName) {
-        if (StringUtils.isNotBlank(hostOpt.get())) {
-            String host = hostOpt.get();
+    private String getCosFilePath(String host, String fileName) {
+        if (StringUtils.isNotBlank(host)) {
             if (host.endsWith("/")) {
-                return new StringBuilder().append(hostOpt.get())
+                return new StringBuilder().append(host)
                         .append(fileName)
                         .toString();
             } else {
-                return new StringBuilder().append(hostOpt.get())
+                return new StringBuilder().append(host)
                         .append("/")
                         .append(fileName)
                         .toString();
