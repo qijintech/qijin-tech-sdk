@@ -14,9 +14,12 @@ import java.io.Serializable;
 public class TxJscode2SessionResp implements Serializable {
     private static final long serialVersionUID = -1060216618475607933L;
 
-    private String sessionKey;
+    private String session_key;
     private String openid;
     private String unionid;
+
+    private int errcode;
+    private String errmsg;
 
     public static TxJscode2SessionResp fromJson(String json) {
         return JSON.parseObject(json, TxJscode2SessionResp.class);
