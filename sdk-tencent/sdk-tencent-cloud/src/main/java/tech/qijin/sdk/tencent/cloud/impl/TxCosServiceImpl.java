@@ -169,7 +169,7 @@ public class TxCosServiceImpl implements TxCosService {
     }
 
     public String randomFileName() {
-        return UUID.randomUUID().toString().replace("-", "");
+        return "filename_" + UUID.randomUUID().toString().replace("-", "");
     }
 
     private String getHost(COSScene cosScene) {
