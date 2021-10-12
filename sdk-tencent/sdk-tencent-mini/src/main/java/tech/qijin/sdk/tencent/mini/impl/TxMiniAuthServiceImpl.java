@@ -1,9 +1,12 @@
 package tech.qijin.sdk.tencent.mini.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Maps;
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import lombok.extern.slf4j.Slf4j;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -12,10 +15,17 @@ import tech.qijin.sdk.tencent.base.Constants;
 import tech.qijin.sdk.tencent.base.TxErrorException;
 import tech.qijin.sdk.tencent.mini.TxMiniAuthService;
 import tech.qijin.sdk.tencent.mini.pojo.TxJscode2SessionResp;
+import tech.qijin.sdk.tencent.mini.pojo.UserPhoneInfo;
 import tech.qijin.util4j.kms.KmsBean;
 import tech.qijin.util4j.lang.constant.ResEnum;
 import tech.qijin.util4j.utils.MAssert;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.AlgorithmParameters;
+import java.security.Security;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,5 +56,36 @@ public class TxMiniAuthServiceImpl implements TxMiniAuthService {
         String url = String.format("%s%s?%s", TxMiniAuthService.DEFAULT_HOST, TxMiniAuthService.JSCODE_TO_SESSION_URL, queryString);
         ResponseEntity<TxJscode2SessionResp> result = txMiniClient.getForEntity(url, TxJscode2SessionResp.class);
         return result.getBody();
+    }
+
+    @Override
+    public UserPhoneInfo decodeUserInfo(String sessionKey, String encryptedData, String iv) {
+        byte[] dataByte = Base64.decode(encryptedData);
+        byte[] keyByte = Base64.decode(sessionKey);
+        byte[] ivByte = Base64.decode(iv);
+        try {
+            int base = 16;
+            if (keyByte.length % base != 0) {
+                int groups = keyByte.length / base + (keyByte.length % base != 0 ? 1 : 0);
+                byte[] temp = new byte[groups * base];
+                Arrays.fill(temp, (byte) 0);
+                System.arraycopy(keyByte, 0, temp, 0, keyByte.length);
+                keyByte = temp;
+            }
+            Security.addProvider(new BouncyCastleProvider());
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
+            SecretKeySpec spec = new SecretKeySpec(keyByte, "AES");
+            AlgorithmParameters parameters = AlgorithmParameters.getInstance("AES");
+            parameters.init(new IvParameterSpec(ivByte));
+            cipher.init(Cipher.DECRYPT_MODE, spec, parameters);
+            byte[] resultByte = cipher.doFinal(dataByte);
+            if (null != resultByte && resultByte.length > 0) {
+                String result = new String(resultByte, "UTF-8");
+                return JSON.parseObject(result, UserPhoneInfo.class);
+            }
+        } catch (Exception e) {
+            log.error("decodeUserInfo exception", e);
+        }
+        return null;
     }
 }
