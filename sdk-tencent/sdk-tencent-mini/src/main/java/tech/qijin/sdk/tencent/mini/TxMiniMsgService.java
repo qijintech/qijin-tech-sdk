@@ -7,5 +7,5 @@ package tech.qijin.sdk.tencent.mini;
  * @date 2020-02-25
  * @relax: 开始眼保健操 ←_← ↓_↓ →_→ ↑_↑
  */
-public interface TxMiniMsgService {
+public interface TxMiniMsgService extends TxMiniTokenService {
 }

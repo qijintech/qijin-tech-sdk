@@ -11,8 +11,7 @@ import tech.qijin.sdk.tencent.mini.pojo.UserPhoneInfo;
  * @date 2020-02-25
  * @relax: 开始眼保健操 ←_← ↓_↓ →_→ ↑_↑
  */
-public interface TxMiniAuthService {
-    String DEFAULT_HOST = "https://api.weixin.qq.com";
+public interface TxMiniAuthService extends TxMiniTokenService {
     /**
      * 获取access_token.
      */
