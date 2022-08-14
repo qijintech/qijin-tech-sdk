@@ -24,7 +24,7 @@ public class TxSubSendResp extends TxError implements Serializable {
             TxError error = fromJson(json, TxType.MINI);
             log.error("MINI subscribe send request error, code={}, msg={}, msgEn={}",
                     error.getErrcode(), error.getErrmsg(),error.getErrorMsgEn());
-            return null;
+            return resp;
         }
         return resp;
     }

@@ -29,7 +29,7 @@ public class TxAuditResp extends TxError implements Serializable {
         if (resp.getErrcode() != 0) {
             TxError error = fromJson(json, TxType.MINI);
             log.error("MINI audit request error, code={}, msg={}", error.getErrcode(), error.getErrmsg());
-            return null;
+            return resp;
         }
         return resp;
     }
