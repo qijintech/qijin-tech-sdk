@@ -46,6 +46,10 @@ public class TxMiniTokenServiceImpl implements TxMiniTokenService {
         return getTokenFromApi();
     }
 
+    public boolean delToken() {
+        return redisUtil.delete(tokenCacheKey());
+    }
+
     private String getTokenFromApi() {
         try {
             if (!tryLock()) return "";

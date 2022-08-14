@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import tech.qijin.sdk.tencent.base.TxAuditLabel;
 import tech.qijin.sdk.tencent.base.TxAuditScene;
+import tech.qijin.sdk.tencent.base.TxMiniErrorCode;
 import tech.qijin.sdk.tencent.mini.TxMiniAuditService;
 import tech.qijin.sdk.tencent.mini.pojo.TxAuditResp;
+import tech.qijin.util4j.aop.annotation.Retry;
 import tech.qijin.util4j.utils.NumberUtil;
 
 import java.util.Map;
@@ -32,6 +34,7 @@ public class TxMiniAuditServiceImpl extends TxMiniTokenServiceImpl implements Tx
     }};
 
 
+    @Retry
     @Override
     public boolean checkMsg(String openid, String content, TxAuditScene scene) {
         String accessToken = getToken();
@@ -46,6 +49,10 @@ public class TxMiniAuditServiceImpl extends TxMiniTokenServiceImpl implements Tx
         if (resp == null) {
             log.error("checkMsg error, openid={}, content={}, scene={}, resp={}", openid, content, scene, resp);
             return true;
+        }
+        if (resp.getErrcode() == TxMiniErrorCode.CODE_40001.getCode()) {
+            delToken();
+            throw new IllegalStateException();
         }
         for (TxAuditResp.TxAuditDetail detail : resp.getDetail()) {
             if (detail.getErrcode() != 0) continue;

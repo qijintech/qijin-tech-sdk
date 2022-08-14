@@ -9,8 +9,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import tech.qijin.sdk.tencent.base.TxMiniErrorCode;
 import tech.qijin.sdk.tencent.mini.TxMiniMsgService;
 import tech.qijin.sdk.tencent.mini.pojo.TxSubSendResp;
+import tech.qijin.util4j.aop.annotation.Retry;
 
 import java.util.Map;
 
@@ -20,6 +22,7 @@ public class TxMiniMsgServiceImpl extends TxMiniTokenServiceImpl implements TxMi
     @Autowired
     private RestTemplate txMiniClient;
 
+    @Retry
     @Override
     public boolean subscribeSend(String openid,
                                  String templateId,
@@ -41,6 +44,10 @@ public class TxMiniMsgServiceImpl extends TxMiniTokenServiceImpl implements TxMi
         if (resp == null) {
             log.error("subscribeSend error, openid={}, templateId={}, data={}", openid, templateId, data);
             return true;
+        }
+        if (resp.getErrcode() == TxMiniErrorCode.CODE_40001.getCode()) {
+            delToken();
+            throw new IllegalStateException();
         }
         return false;
     }
