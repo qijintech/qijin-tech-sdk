@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -31,8 +33,11 @@ public class TxMiniMsgServiceImpl extends TxMiniTokenServiceImpl implements TxMi
         payload.put("page", page);
         payload.put("data", data);
         log.info("payload={}", JSON.toJSONString(payload));
-        ResponseEntity<String> entity = txMiniClient.postForEntity(requestUrl(uri), JSON.toJSONString(payload), String.class);
-        TxSubSendResp resp = TxSubSendResp.fromJson(entity.getBody());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "application/json; charset=UTF-8");
+        HttpEntity<String> entity = new HttpEntity<>(JSON.toJSONString(payload), headers);
+        ResponseEntity<String> resEntity = txMiniClient.postForEntity(requestUrl(uri), entity, String.class);
+        TxSubSendResp resp = TxSubSendResp.fromJson(resEntity.getBody());
         if (resp == null) {
             log.error("subscribeSend error, openid={}, templateId={}, data={}", openid, templateId, data);
             return true;
